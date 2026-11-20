@@ -1,0 +1,214 @@
+// SmartStudy - Student Performance Analyzer
+
+let subjects = JSON.parse(localStorage.getItem("subjects")) || [];
+let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+let attendance = JSON.parse(localStorage.getItem("attendance")) || {
+    present: 0,
+    total: 0
+};
+
+// Save data
+function saveData() {
+    localStorage.setItem("subjects", JSON.stringify(subjects));
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+    localStorage.setItem("attendance", JSON.stringify(attendance));
+}
+
+// Prevent HTML injection
+function safeText(value) {
+    return String(value).replace(/[&<>"']/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+    })[char]);
+}
+
+// Add subject marks
+document.getElementById("marksForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+
+    const name = document.getElementById("subjectName").value.trim();
+    const mark = Number(document.getElementById("subjectMark").value);
+
+    if (!name || !Number.isFinite(mark) || mark < 0 || mark > 100) {
+        alert("Enter a valid subject and marks between 0 and 100.");
+        return;
+    }
+
+    subjects.push({ name, mark });
+
+    saveData();
+    this.reset();
+    updateDashboard();
+});
+
+// Display subjects
+function renderSubjects() {
+    const list = document.getElementById("subjectList");
+
+    list.innerHTML = subjects.map((s, index) => `
+        <div class="subject-item">
+            <span>${safeText(s.name)}</span>
+            <strong>${s.mark}/100</strong>
+            <button onclick="deleteSubject(${index})">Delete</button>
+        </div>
+    `).join("");
+
+    const chart = document.getElementById("chart");
+
+    chart.innerHTML = subjects.map(s => `
+        <div class="bar" style="height:${Math.max(s.mark, 3)}%">
+            <b>${s.mark}</b>
+            <span>${safeText(s.name)}</span>
+        </div>
+    `).join("");
+}
+
+// Delete subject
+function deleteSubject(index) {
+    subjects.splice(index, 1);
+    saveData();
+    updateDashboard();
+}
+
+// Attendance
+function markAttendance(isPresent) {
+    attendance.total++;
+
+    if (isPresent) {
+        attendance.present++;
+    }
+
+    saveData();
+    updateDashboard();
+}
+
+document.getElementById("presentBtn").addEventListener("click", () => {
+    markAttendance(true);
+});
+
+document.getElementById("absentBtn").addEventListener("click", () => {
+    markAttendance(false);
+});
+
+document.getElementById("resetAttendance").addEventListener("click", () => {
+    if (confirm("Reset all attendance records?")) {
+        attendance = { present: 0, total: 0 };
+        saveData();
+        updateDashboard();
+    }
+});
+
+// Add study task
+document.getElementById("taskForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+
+    const input = document.getElementById("taskInput");
+    const task = input.value.trim();
+
+    if (!task) return;
+
+    tasks.push({ name: task, completed: false });
+
+    saveData();
+    this.reset();
+    updateDashboard();
+});
+
+// Display tasks
+function renderTasks() {
+    const list = document.getElementById("taskList");
+
+    list.innerHTML = tasks.map((task, index) => `
+        <div class="task-item">
+            <span>${safeText(task.name)} ${task.completed ? "✓" : ""}</span>
+            <div>
+                <button onclick="toggleTask(${index})">
+                    ${task.completed ? "Undo" : "Done"}
+                </button>
+                <button onclick="deleteTask(${index})">Delete</button>
+            </div>
+        </div>
+    `).join("");
+}
+
+// Complete task
+function toggleTask(index) {
+    tasks[index].completed = !tasks[index].completed;
+    saveData();
+    updateDashboard();
+}
+
+// Delete task
+function deleteTask(index) {
+    tasks.splice(index, 1);
+    saveData();
+    updateDashboard();
+}
+
+// Smart study suggestions
+function renderSuggestions() {
+    const area = document.getElementById("suggestions");
+
+    if (subjects.length === 0) {
+        area.textContent = "Add subject marks to receive study suggestions.";
+        return;
+    }
+
+    const average = subjects.reduce((sum, s) => sum + s.mark, 0)
+                    / subjects.length;
+
+    const weak = subjects.filter(s => s.mark < 50);
+
+    let message = `Your average score is ${average.toFixed(1)}%. `;
+
+    if (weak.length > 0) {
+        message += "Focus more on: " +
+            weak.map(s => safeText(s.name)).join(", ");
+    } else if (average >= 80) {
+        message += "Excellent performance! Keep practising.";
+    } else {
+        message += "Good progress! Revise your subjects regularly.";
+    }
+
+    area.innerHTML = message;
+}
+
+// Update dashboard
+function updateDashboard() {
+    const total = subjects.length;
+
+    const average = total
+        ? subjects.reduce((sum, s) => sum + s.mark, 0) / total
+        : 0;
+
+    const rate = attendance.total
+        ? (attendance.present / attendance.total) * 100
+        : 0;
+
+    document.getElementById("totalSubjects").textContent = total;
+
+    document.getElementById("averageMarks").textContent =
+        average.toFixed(1) + "%";
+
+    document.getElementById("attendanceRate").textContent =
+        rate.toFixed(1) + "%";
+
+    document.getElementById("taskCount").textContent =
+        tasks.filter(t => !t.completed).length;
+
+    document.getElementById("presentCount").textContent =
+        attendance.present;
+
+    document.getElementById("classCount").textContent =
+        attendance.total;
+
+    renderSubjects();
+    renderTasks();
+    renderSuggestions();
+}
+
+// Initial loading
+updateDashboard();
