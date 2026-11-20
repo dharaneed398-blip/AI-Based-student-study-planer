@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartStudy | Student Analyzer</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="sidebar">
+    <h2>🎓 SmartStudy</h2>
+    <p class="tagline">Student Performance Analyzer</p>
+
+    <nav>
+        <a href="#dashboard">🏠 Dashboard</a>
+        <a href="#subjects">📚 Subjects</a>
+        <a href="#attendance">📅 Attendance</a>
+        <a href="#planner">📝 Study Planner</a>
+    </nav>
+
+    <p class="footer">Created by Dharaneedharan AM</p>
+</div>
+
+<main>
+    <header>
+        <div>
+            <h1>Student Dashboard</h1>
+            <p>Welcome! Track your learning progress.</p>
+        </div>
+        <div class="profile">👨‍🎓 Student</div>
+    </header>
+
+    <section class="stats" id="dashboard">
+        <div class="card">
+            <p>Total Subjects</p>
+            <h2 id="totalSubjects">0</h2>
+        </div>
+        <div class="card">
+            <p>Average Marks</p>
+            <h2 id="averageMarks">0%</h2>
+        </div>
+        <div class="card">
+            <p>Attendance</p>
+            <h2 id="attendanceRate">0%</h2>
+        </div>
+        <div class="card">
+            <p>Study Tasks</p>
+            <h2 id="taskCount">0</h2>
+        </div>
+    </section>
+
+    <section class="panel" id="subjects">
+        <h2>📚 Subject Performance</h2>
+
+        <form id="marksForm">
+            <input id="subjectName" placeholder="Subject name" required>
+            <input id="subjectMark" type="number"
+                   placeholder="Marks (0-100)" min="0" max="100" required>
+            <button type="submit">Add Marks</button>
+        </form>
+
+        <div id="subjectList"></div>
+
+        <h3>Performance Graph</h3>
+        <div id="chart" class="chart"></div>
+    </section>
+
+    <section class="panel" id="attendance">
+        <h2>📅 Attendance Tracker</h2>
+        <p>Classes Attended: <span id="presentCount">0</span></p>
+        <p>Total Classes: <span id="classCount">0</span></p>
+
+        <button id="presentBtn">Mark Present</button>
+        <button id="absentBtn" class="secondary">Mark Absent</button>
+        <button id="resetAttendance" class="secondary">Reset</button>
+    </section>
+
+    <section class="panel" id="planner">
+        <h2>📝 Daily Study Planner</h2>
+
+        <form id="taskForm">
+            <input id="taskInput" placeholder="Enter study task" required>
+            <button type="submit">Add Task</button>
+        </form>
+
+        <div id="taskList"></div>
+    </section>
+
+    <section class="panel">
+        <h2>💡 Smart Study Suggestions</h2>
+        <div id="suggestions">
+            Add your subject marks to receive suggestions.
+        </div>
+    </section>
+
+</main>
+
+<script src="script.js"></script>
+</body>
+</html>
